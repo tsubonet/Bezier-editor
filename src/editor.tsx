@@ -4,11 +4,12 @@ const Editor: React.FC<{}> = () => {
   const [width, setWidth] = React.useState(0);
   const [height, setHeight] = React.useState(0);
   const [points, setPoints] = React.useState([
-    { x: 200, y: 200 },
-    { x: 240, y: 200 },
+    { x: 100, y: 100 },
+    { x: 140, y: 100 },
     { x: 210, y: 250 },
     { x: 250, y: 250 }
   ]);
+  const [grabbingIndex, setGrabbingIndex] = React.useState(null);
 
   const getWindowSize = () => {
     setWidth(window.innerWidth);
@@ -20,9 +21,37 @@ const Editor: React.FC<{}> = () => {
     getWindowSize();
     () => window.removeEventListener("resize", getWindowSize);
   }, []);
+
+  const handlePointerDown = (index) => {
+    setGrabbingIndex(index);
+  }
+
+  const handlePointerMove = (e) => {
+    if (grabbingIndex === null) {
+      return;
+    }
+    const _points = points.map((p, i) => {
+      if (i === grabbingIndex) {
+        return {
+          x: e.pageX,
+          y: e.pageY,
+        }
+      }
+      return p;
+    });
+    setPoints(_points);
+  }
+
+  const handlePointerUp = () => {
+    setGrabbingIndex(null);
+  }
   
   return (
-    <div contentEditable>
+    <div
+      contentEditable
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+    >
       <svg 
         width={width}
         height={height}
@@ -42,10 +71,35 @@ const Editor: React.FC<{}> = () => {
         />
         <line x1={points[0].x} y1={points[0].y} x2={points[1].x} y2={points[1].y} stroke="#e0e0e0" stroke-width="4"/>
         <line x1={points[2].x} y1={points[2].y} x2={points[3].x} y2={points[3].y} stroke="#e0e0e0" stroke-width="4"/>
-        <circle cx={points[0].x} cy={points[0].y} r="10" fill="#666666" className="oops" />
-        <circle cx={points[1].x} cy={points[1].y} r="10" fill="#42b883" className="can-grab" />
-        <circle cx={points[2].x} cy={points[2].y} r="10" fill="#35495e" className="can-grab" />
-        <circle cx={points[3].x} cy={points[3].y} r="10" fill="#666666" className="oops" />
+        <circle
+          cx={points[0].x}
+          cy={points[0].y}
+          r="10"
+          fill="#666666"
+          onPointerDown={() => handlePointerDown(0) }
+          
+        />
+        <circle
+          cx={points[1].x}
+          cy={points[1].y}
+          r="10"
+          fill="#42b883"
+          onPointerDown={() => handlePointerDown(1) }
+        />
+        <circle
+          cx={points[2].x}
+          cy={points[2].y}
+          r="10"
+          fill="#42b883"
+          onPointerDown={() => handlePointerDown(2) }
+        />
+        <circle
+          cx={points[3].x}
+          cy={points[3].y}
+          r="10"
+          fill="#666666"
+          onPointerDown={() => handlePointerDown(3) }
+        />
       </svg>
     </div>
   )
